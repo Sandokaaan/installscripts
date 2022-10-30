@@ -1,3 +1,3 @@
 #! /bin/sh
 
-earthcoind --daemon
+earthcoind -daemon -txindex=1
