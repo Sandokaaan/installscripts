@@ -11,4 +11,5 @@ sudo -u $BUILDER ./eacbuild
 cd Earthcoin
 sudo make install
 
+cd ..
 sudo ./setservice
