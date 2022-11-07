@@ -1,0 +1,68 @@
+#! /bin/bash
+
+####################################
+### optional parameters section ####
+####################################
+
+RPCPORT=15678
+USERNAME=eacdaemon
+PASSWORD=
+
+####################################
+
+# Check if run as root
+if [ $USER == "root" ]; then
+  echo "Earthcoin service auto-install script"
+else
+  echo "Error: This script must be run with root privileges!"
+  exit
+fi
+
+# Create user, if not exists
+if [ -d /home/$USERNAME ]; then
+  echo "User $USERNAME already exists"
+else
+  ./createuser $USERNAME
+  echo "User $USERNAME created"
+fi
+
+# Generate a password for RPC calls, if not provided above
+if [ -z $PASSWORD ]; then
+  echo "Password not specifid so generate random"
+  PASSWORD=$( ./passwordgen )
+fi
+
+# Check or make earthcoin data folder
+CFGDIR="/home/"$USERNAME"/.earthcoin"
+if [ -d $CFGDIR ]; then
+  echo "Folder $CFGDIR already exists"
+else
+  mkdir $CFGDIR
+  chown $USERNAME:$USERNAME $CFGDIR
+  echo "Folder $CFG created"
+fi
+
+# Create earthcoin.conf file, in not exists
+CFGFILE=$CFGDIR"/earthcoin.conf"
+if [ -f "$CFGFILE" ]; then
+    echo "$CFGFILE already exists"
+else
+  echo "rpcuser="$USERNAME > $CFGFILE
+  chown $USERNAME:$USERNAME $CFGFILE
+  echo "rpcpassword="$PASSWORD >> $CFGFILE
+  echo "rpcallowip=127.0.0.1" >> $CFGFILE
+  echo "rpcport="$RPCPORT >> $CFGFILE
+  echo -e "daemon=0\nserver=1\nnoirc=1\ngen=0\ntestnet=0\nlisten=1\ntxindex=1\naddressindex=1\ntimestampindex=1\nspentindex=1\n" >> $CFGFILE
+  echo "" >> $CFGFILE
+  echo "$CFGFILE created"
+fi
+
+# register earthcoin.service to start automatically
+cp ./earthcoin.service /usr/local/bin/
+systemctl daemon-reload
+systemctl enable /usr/local/bin/earthcoin.service
+systemctl daemon-reload
+systemctl start earthcoin
+
+echo "earthcoin.service created"
+echo -e "Usage:\nsystemctl status earthcoin\nsystemctl start earthcoin\nsystemctl stop earthcoin\n"

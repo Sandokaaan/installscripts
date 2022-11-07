@@ -1,0 +1,34 @@
+#! /bin/bash
+
+if [ -z $1 ]; then
+  echo "Create user failed - missing USERNAME!"
+  echo "Usage: create_user USERNAME [PASSWORD]"
+  exit
+fi
+
+UNAME=$1
+UP="/home/$UNAME"
+if [ -d $UP ]; then
+  echo "Error: User $NAME already exists!"
+  exit
+fi
+
+useradd -m $UNAME
+UP="/home/$UNAME"
+if [ -d $UP ]; then
+  echo "User account $UNAME created."
+  chsh -s /bin/bash $UNAME
+  PASSWD=$2
+  if [ -z $2 ]; then
+    echo "Missing PASSWORD. Generated random."
+    PASSWD=$( ./passwordgen )
+  fi
+  echo -e "$PASSWD\n$PASSWD" | passwd $UNAME
+#  echo $PASSWD
+  exit
+fi
+
+echo "Error: This script must be run with root privileges!"
+
+
+

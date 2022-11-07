@@ -1,0 +1,7 @@
+#! /bin/bash
+
+git clone https://github.com/Sandokaaan/Earthcoin.git
+cd Earthcoin
+./autogen.sh
+./configure --disable-tests --disable-gui-tests --with-incompatible-bdb
+make

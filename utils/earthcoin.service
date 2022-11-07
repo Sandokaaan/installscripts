@@ -1,0 +1,14 @@
+[Unit]
+Description=Earthcoin service
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=10
+PIDFile=/home/eacdaemon/.earthcoin/earthcoin.pid
+User=eacdaemon
+ExecStart=/usr/local/bin/earthcoind
+ExecStop=/usr/local/bin/earthcoin-cli stop
+
+[Install]
+WantedBy=multi-user.target
