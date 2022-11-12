@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# Check if run as root
+if [ $USER == "root" ]; then
+  echo "Mysql auto-install script"
+else
+  echo "Error: This script must be run with root privileges!"
+  exit
+fi
+
+#Generate a random password for mysql sa
+PASSWORD=$( ./passwordgen )
+echo $PASSWORD >> mysqlpw.txt
+
+apt-get -y update
+apt-get -y install expect
+
+VAR=$(expect -c '
+spawn apt-get -y install mysql-server
+expect "New password for the MySQL \"root\" user:"
+send "'$PASSWORD'\r"
+expect "Repeat password for the MySQL \"root\" user:"
+send "'$PASSWORD'\r"
+expect eof
+')
+
+echo "$VAR"
+
+apt-get -y install mysql-client
+
+#For some reason important to restart - otherwise possible errors
+systemctl start mysql.service
+
