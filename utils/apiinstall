@@ -1,0 +1,78 @@
+#!/bin/bash
+
+BUILDER=$1
+if [ -z $BUILDER ]; then
+  BUILDER=$USER
+fi
+
+# Check if run as root
+if [ $USER == "root" ]; then
+  echo "API auto-install script"
+else
+  echo "Error: This script must be run with root privileges!"
+  exit
+fi
+
+CFGFILE="/home/eacdaemon/.earthcoin/earthcoin.conf"
+if [ -f "$CFGFILE" ]; then
+    echo "$CFGFILE exists."
+else
+    echo -e "$CFGFILE not found.\nMake sure to run 'install_earthcoin.sh' first!"
+    exit
+fi
+
+sudo apt install -y openjdk-8-jre-headless
+
+DBNAME="eac";
+DBUSER="eacapi";
+DBPASSWORD="$( ./passwordgen )!Q4c"
+RPCUSERLINE=$( cat $CFGFILE | grep rpcuser )
+RPCPWLINE=$( cat  $CFGFILE | grep rpcpassword )
+RPCPORTLINE=$( cat $CFGFILE | grep rpcport )
+IP=$( hostname -I )
+
+#download API JAVA binary distribution
+sudo -u $BUILDER git clone --branch mysql https://github.com/Sandokaaan/EAC_API_JAVA.git
+cd ./EAC_API_JAVA/dist
+
+FILE="./api.conf"
+INSTPATH="/usr/local/share/apijava"
+#create new config file
+echo -e "#Autoinstall generated config\n\n#Coin name\ncoin=Earthcoin\n" > $FILE
+echo -e "#Coin ticker\nticker=EAC\n" >> $FILE
+echo -e "#Protocol version,  see source code of your coin\nprotocolversion=70018\n" >> $FILE
+echo -e "#IP address for RPC requests, usually localhost\nrpcip=127.0.0.1\n" >> $FILE
+echo -e "#Port number of RPC server, see your node config file\n$RPCPORTLINE\n" >> $FILE
+echo -e "#User name for RPC setver, see your node config file\n$RPCUSERLINE\n" >> $FILE
+echo -e "#Password for RPC setver, see your node config file\n$RPCPWLINE\n" >> $FILE
+echo -e "#URL of your API server, use IP or domain name\napiurl=$IP\n" >> $FILE
+echo -e "#Port number of your API server\napiport=9000\n" >> $FILE
+echo -e "#API run over SSL (1) or unsecured (0)\nusessl=0\n" >> $FILE
+echo -e "#Path to your SSL certificate, if applicable\nsslcertpath=$INSTPATH/cert.jks\n" >> $FILE
+echo -e "#Password for your SSL certificate, if applicable\nsslcertpassword=password\n" >> $FILE
+echo -e "#Use build-in block explorer (1) or API only(0)\nexplorer=0\n" >> $FILE
+echo -e "#IP address for P2P connection, usually localhost\np2pip=127.0.0.1\n" >> $FILE
+echo -e "#Port number of your P2P peer, see your node config file\np2pport=35677\n" >> $FILE
+echo -e "#Magic number for connection to P2P network, see source code of your coin\np2pmagic=-34481216\n" >> $FILE
+echo -e "#Name of the client in the P2P network, arbitrary\np2ppeername=Java API Server\n" >> $FILE
+echo -e "#Delay (in miliseconds) for next reconnect attemp on p2p connection lost\nreconnectdelay=5000\n" >> $FILE
+echo -e "#Database driver. Do not change, if not understand.\ndbdriver=com.mysql.cj.jdbc.Driver\n" >> $FILE
+echo -e "#Database prefix. Change 'localhot' to IP address of your MySQL server.\ndbprefix=jdbc:mysql://localhost/\n" >> $FILE
+echo -e "#Database name.\ndbname=$DBNAME\n" >> $FILE
+echo -e "#Database username.\ndbuser=$DBUSER\n" >> $FILE
+echo -e "#Database password.\ndbpassword=$DBPASSWORD\n" >> $FILE
+echo -e "#Absolute or relative path to the API documentation file." >> $FILE
+echo -e "#The file must contain a valid json structure. \n#Feel free to use a translation to your language." >> $FILE
+echo -e "docpath=$INSTPATH/doc/english.json\n" >> $FILE
+
+#install API JAVA
+mkdir /usr/local/share/apijava
+cp -f -r * /usr/local/share/apijava
+
+#create mysql user for api
+sudo mysql -e "CREATE USER '$DBUSER'@'localhost' IDENTIFIED BY '$DBPASSWORD';"
+sudo mysql -e "CREATE DATABASE $DBNAME;"
+sudo mysql -e "GRANT ALL ON $DBNAME.* TO '$DBUSER'@'localhost';"
+sudo mysql -e "FLUSH PRIVILEGES;"
+
+exit

@@ -9,25 +9,16 @@ else
 fi
 
 #Generate a random password for mysql sa
-PASSWORD=$( ./passwordgen )
-echo $PASSWORD >> mysqlpw.txt
+PASSWORD="$( ./passwordgen )!W9x"
 
 apt-get -y update
-apt-get -y install expect
-
-VAR=$(expect -c '
-spawn apt-get -y install mysql-server
-expect "New password for the MySQL \"root\" user:"
-send "'$PASSWORD'\r"
-expect "Repeat password for the MySQL \"root\" user:"
-send "'$PASSWORD'\r"
-expect eof
-')
-
-echo "$VAR"
-
+DEBIAN_FRONTEND=noninteractive sudo -E apt-get -q -y install mysql-server
+apt-get -y install mysql-comunity-server
 apt-get -y install mysql-client
 
+mysqladmin -u root password $PASSWORD
+
 #For some reason important to restart - otherwise possible errors
+systemctl stop mysql.service
 systemctl start mysql.service
 
