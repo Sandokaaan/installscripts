@@ -76,7 +76,7 @@ sudo mysql -e "GRANT ALL ON $DBNAME.* TO '$DBUSER'@'localhost';"
 sudo mysql -e "FLUSH PRIVILEGES;"
 
 systemctl daemon-reload
-systemctl enable /usr/local/bin/eacapi.service
+systemctl enable /usr/local/share/apijava/eacapi.service
 systemctl daemon-reload
 systemctl start eacapi
 echo "eacapi.service created"
