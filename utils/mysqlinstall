@@ -11,14 +11,27 @@ fi
 #Generate a random password for mysql sa
 PASSWORD="$( ./passwordgen )!W9x"
 
-apt-get -y update
-DEBIAN_FRONTEND=noninteractive sudo -E apt-get -q -y install mysql-server
-apt-get -y install mysql-comunity-server
+#remove previous mysql version
+export DEBIAN_FRONTEND=noninteractive
+sudo apt-get -y remove --purge "^mysql.*"
+sudo apt-get -y autoremove
+sudo apt-get -y autoclean
+sudo rm -rf /var/lib/mysql
+sudo rm -rf /var/log/mysql
+
+#force to install mysql 8.0
+export DEBIAN_FRONTEND=noninteractive
+wget -c https://dev.mysql.com/get/mysql-apt-config_0.8.22-1_all.deb
+sudo -E dpkg -i mysql-apt-config_0.8.22-1_all.deb
+sudo apt update -q
+sudo -E apt install -q -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" mysql-server
+
+#install mysql client
 apt-get -y install mysql-client
 
+#set mysql SA password
 mysqladmin -u root password $PASSWORD
 
 #For some reason important to restart - otherwise possible errors
 systemctl stop mysql.service
 systemctl start mysql.service
-
