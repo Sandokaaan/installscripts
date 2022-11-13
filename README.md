@@ -8,4 +8,7 @@ Install scripts for Earthcoin under Ubuntu linux
 <code>install_api.sh</code> - This script will download and install java runtime libraries and API JAVA binary distibution. API is installed as a service and run automatically after reboot. After installation, API can be accessed at http://[YOUR_IP]:9000
 
 
-TO-DO: Pre-install configuration file. SSL version.
+TO-DO: 
+- Pre-install configuration file. 
+- SSL version.
+- fix api service to wait after mysql (reboot)
