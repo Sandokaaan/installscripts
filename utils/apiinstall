@@ -75,4 +75,9 @@ sudo mysql -e "CREATE DATABASE $DBNAME;"
 sudo mysql -e "GRANT ALL ON $DBNAME.* TO '$DBUSER'@'localhost';"
 sudo mysql -e "FLUSH PRIVILEGES;"
 
-exit
+systemctl daemon-reload
+systemctl enable /usr/local/bin/eacapi.service
+systemctl daemon-reload
+systemctl start eacapi
+echo "eacapi.service created"
+echo -e "Usage:\nsystemctl status eacapi\nsystemctl start eacapi\nsystemctl stop eacapi\n"
