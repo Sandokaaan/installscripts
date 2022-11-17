@@ -11,4 +11,7 @@ Install scripts for Earthcoin under Ubuntu linux
 TO-DO: 
 - Pre-install configuration file. 
 - SSL version.
-- fix api service to wait after mysql (reboot)
+
+SYSTEM REQUIREMENTS
+- RAM 4 GB
+- HDD SPACE 40 GB
