@@ -69,6 +69,11 @@ echo -e "docpath=$INSTPATH/doc/english.json\n" >> $FILE
 mkdir /usr/local/share/apijava
 cp -f -r * /usr/local/share/apijava
 
+#clear up after setup
+cd ..
+cd ..
+rm -r EAC_API_JAVA
+
 #create mysql user for api
 sudo mysql -e "CREATE USER '$DBUSER'@'localhost' IDENTIFIED BY '$DBPASSWORD';"
 sudo mysql -e "CREATE DATABASE $DBNAME;"
