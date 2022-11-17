@@ -1,15 +1,26 @@
 #! /bin/bash
 
+# check user privileges
 BUILDER=$1
 if [ -z $BUILDER ]; then
   BUILDER=$USER
 fi
 
+# update system and dependences, get the source code and build it
 sudo apt-get -y update
 sudo apt-get -y install build-essential libtool autotools-dev automake pkg-config libssl-dev libevent-dev bsdmainutils python3 libboost-system-dev libboost-filesystem-dev libboost-chrono-dev libboost-test-dev libboost-thread-dev libdb-dev libdb++-dev
 sudo -u $BUILDER ./eacbuild
 cd Earthcoin
 sudo make install
 
+# do strip to save diskspace
+INST=/usr/local/bin
+sudo strip $INST/bench_earthcoin  $INST/earthcoin-cli  $INST/earthcoind  $INST/earthcoin-tx
+
+
+# clean up
 cd ..
+rm -r Earthcoin
+
+# setup earthcoin daemon as a service
 sudo ./setservice
